@@ -1,0 +1,106 @@
+-- Script MySQL - Sistema de Biblioteca
+
+SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
+SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
+SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
+
+-- -----------------------------------------------------
+-- Schema biblioteca
+-- -----------------------------------------------------
+CREATE SCHEMA IF NOT EXISTS `biblioteca` DEFAULT CHARACTER SET utf8;
+USE `biblioteca`;
+
+-- -----------------------------------------------------
+-- Tabela `usuarios` (equivalente a clientes)
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `usuarios` (
+  `id_usuario` INT NOT NULL AUTO_INCREMENT,
+  `nome_usuario` VARCHAR(100) NULL,
+  `cpf_usuario` CHAR(11) NULL,
+  `email_usuario` VARCHAR(100) NULL,
+  `telefone_usuario` VARCHAR(20) NULL,
+  `dat_nasc_usuario` DATE NULL,
+  PRIMARY KEY (`id_usuario`)
+) ENGINE = InnoDB;
+
+-- -----------------------------------------------------
+-- Tabela `funcionario`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `funcionario` (
+  `id_funcionario` INT NOT NULL AUTO_INCREMENT,
+  `nome_funcionario` VARCHAR(100) NULL,
+  `telefone_funcionario` VARCHAR(20) NULL,
+  `email_funcionario` VARCHAR(100) NULL,
+  PRIMARY KEY (`id_funcionario`)
+) ENGINE = InnoDB;
+
+-- -----------------------------------------------------
+-- Tabela `editora` (equivalente a marca)
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `editora` (
+  `id_editora` INT NOT NULL AUTO_INCREMENT,
+  `nome_editora` VARCHAR(100) NOT NULL,
+  PRIMARY KEY (`id_editora`)
+) ENGINE = InnoDB;
+
+-- -----------------------------------------------------
+-- Tabela `livro` (equivalente a modelo)
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `livro` (
+  `id_livro` INT NOT NULL AUTO_INCREMENT,
+  `titulo_livro` VARCHAR(150) NOT NULL,
+  `ano_publicacao` YEAR NULL,
+  `genero_livro` VARCHAR(45) NULL,
+  `autor_livro` VARCHAR(100) NULL,
+  `isbn_livro` VARCHAR(20) NULL,
+  `qtd_exemplares` INT NULL,
+  `editora_id_editora` INT NOT NULL,
+  PRIMARY KEY (`id_livro`, `editora_id_editora`),
+  INDEX `fk_livro_editora1_idx` (`editora_id_editora` ASC),
+  CONSTRAINT `fk_livro_editora1`
+    FOREIGN KEY (`editora_id_editora`)
+    REFERENCES `editora` (`id_editora`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+) ENGINE = InnoDB;
+
+-- -----------------------------------------------------
+-- Tabela `emprestimos` (equivalente a vendas)
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `emprestimos` (
+  `id_emprestimo` INT NOT NULL AUTO_INCREMENT,
+  `data_emprestimo` DATE NULL,
+  `data_prevista_devolucao` DATE NULL,
+  `data_devolucao` DATE NULL,
+  `usuarios_id_usuario` INT NOT NULL,
+  `funcionario_id_funcionario` INT NOT NULL,
+  `livro_id_livro` INT NOT NULL,
+  PRIMARY KEY (
+    `id_emprestimo`,
+    `usuarios_id_usuario`,
+    `funcionario_id_funcionario`,
+    `livro_id_livro`
+  ),
+  INDEX `fk_emprestimos_usuarios_idx` (`usuarios_id_usuario` ASC),
+  INDEX `fk_emprestimos_funcionario1_idx` (`funcionario_id_funcionario` ASC),
+  INDEX `fk_emprestimos_livro1_idx` (`livro_id_livro` ASC),
+  CONSTRAINT `fk_emprestimos_usuarios`
+    FOREIGN KEY (`usuarios_id_usuario`)
+    REFERENCES `usuarios` (`id_usuario`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_emprestimos_funcionario1`
+    FOREIGN KEY (`funcionario_id_funcionario`)
+    REFERENCES `funcionario` (`id_funcionario`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_emprestimos_livro1`
+    FOREIGN KEY (`livro_id_livro`)
+    REFERENCES `livro` (`id_livro`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+) ENGINE = InnoDB;
+
+SET SQL_MODE=@OLD_SQL_MODE;
+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
+SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
